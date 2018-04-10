@@ -4,51 +4,41 @@ SHELL := /bin/bash #bash syntax
 #
 # Setup a four node Indy Cluster, and four Indy clients called Indy, Faber, Acme, and Thrift 
 #
-# *** How to make the indy-base docker image
+# *** Make the indy-base docker image
 #
-#   make -f Makefile indy-base
+#   make indy-base
 #
-# *** How to use LOCAL IP without editing makefile to Create Alice LOCALLY
-#    THIS WILL make Alice Locally if it correctly finds your Local IP (not 127.0.01)
+# *** Run the first part of the Alice demo and then interactively run the rest of the demo
 #
-#    make -f Makefile local run-demo
+#    make run-demo
 #
-#    * note: using local as a dependency before any command will set IPS to Local IP
+# *** Run the entire Alice demo
 #
+#    make run-alice
 #
-# *** You can start a cluster and then start indy and agents (Only run the first time)
-#    make -f  Makefile cluster
-#    make -f  Makefile indy
+# *** Start a cluster and then start indy and agents (Only run the first time)
+#    make cluster
+#    make indy
 #
-# *** You can start a cluster and then start indy prompt
-#    make -f  Makefile cluster
-#    make -f  Makefile indy-cli
+# *** Start a cluster and then start indy prompt
+#    make cluster
+#    make indy-cli
 #
-# *** You can start Alice using IP assigned in makefile
-#   make -f  Makefile run-demo
+# *** Start Faber only
+#   make faber
 #
-# ***You can start Faber only
-#   make -f  Makefile faber
+# *** You can stop all docker containers
+#   make stop
 #
-# AUTHORS 	R Redpath, Bryce Curtis, Aaron Reed 
-#
+# *** Remove all docker containers
+#   make clean
 #
 
-IPS=10.0.1.12,10.0.1.12,10.0.1.12,10.0.1.12
-IPFABER=10.0.1.12
-IPACME=10.0.1.12
-IPTHRIFT=10.0.1.12
-
-#
-# set the IP address of your nodes
-#
-#IPS=ip_address,ip_address,ip_address,ip_address
-#IPFABER=ip_address
-#IPACME=ip_address
-#IPTHRIFT=ip_address
-
-# fixes if there is an addr:
+# Detect the local IP address
 LOCAL:=$(shell ifconfig|grep 'inet '|grep -vm1 127.0.0.1|awk '{print $$2}' | sed -e 's/addr://g')
+
+# Uncomment to manually set the local IP address if not set correctly above
+# LOCAL=192.168.1.100
 
 NO_COLOR="\x1b[0m"
 OK_COLOR="\x1b[32;01m"
@@ -77,7 +67,7 @@ local:
 	$(eval IPACME=$(LOCAL))
 	$(eval IPTHRIFT=$(LOCAL))
 
-info:
+info: local
 	@echo -e  $(BLUE_COLOR) Settings.... $(NO_COLOR)
 	@echo -e  $(BLUE_COLOR) IPS=$(IPS) $(NO_COLOR)
 	@echo -e  $(BLUE_COLOR) IPFABER=$(IPFABER) $(NO_COLOR)
