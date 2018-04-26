@@ -53,10 +53,7 @@ run-alice: clean info cluster faber acme thrift indy-alice
 
 indy-base:
 	@echo -e  $(BLUE_COLOR)Indy-base Docker $(NO_COLOR)
-	-rm -Rf ./indy-node
 	-docker rmi -f indy-base
-	git clone https://github.com/hyperledger/indy-node.git; cd indy-node;pwd;git checkout stable;git status
-	cp ./indy-cli ./indy-node/scripts
 	docker build -t indy-base -f ./indy-base-dockerfile .
 	@echo -e  $(GREEN_COLOR)SUCCESS Indy-base Docker $(LOCAL) $(NO_COLOR)
 
@@ -90,7 +87,7 @@ indy: info
 	@echo -e  $(BLUE_COLOR) INDY: Create Indy and initialize with commandline jobs $(IPS) $(NO_COLOR)
 	docker run --rm --name Indy -it indy-base /bin/bash -c "\
                         create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); \
-			  /root/scripts/indy-cli \
+			  ./indy-cli \
 			  'connect sandbox' \
 			  'new key with seed 000000000000000000000000Steward1' \
 			  'send NYM dest=ULtgFQJe6bjiFbs7ke3NJD role=TRUST_ANCHOR verkey=~5kh3FB4H3NKq7tUDqeqHc1' \
@@ -111,7 +108,7 @@ indy-alice: info
 	@echo -e  $(BLUE_COLOR) INDY ALICE: Create Indy and initialize with commandline jobs $(IPS) $(NO_COLOR)
 	docker run --rm --name IndyAlice -it indy-base /bin/bash -c "\
                         create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); \
-			  /root/scripts/indy-cli \
+			  ./indy-cli \
 			  'connect sandbox' \
 			  'new key with seed 000000000000000000000000Steward1' \
 			  'send NYM dest=ULtgFQJe6bjiFbs7ke3NJD role=TRUST_ANCHOR verkey=~5kh3FB4H3NKq7tUDqeqHc1' \
@@ -159,18 +156,19 @@ indy-alice: info
 
 faber:
 	@echo -e  $(BLUE_COLOR) FABER: Create Faber $(IPS) $(NO_COLOR)
-	docker run --rm --name Faber -d -p 5555:5555 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 ./indy_client/test/agent/faber.py  --port 5555"
+	docker run --rm --name Faber -d -p 5555:5555 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 /usr/local/lib/python3.5/dist-packages/indy_client/test/agent/faber.py  --port 5555"
 	@echo -e  $(OK_COLOR) Faber success assumes IPS $(IPS) $(NO_COLOR)
 
 acme:
 	@echo -e  $(BLUE_COLOR) ACME: Create Acme $(IPS) $(NO_COLOR)
-	docker run --rm --name Acme -d -p 6666:6666 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 ./indy_client/test/agent/acme.py  --port 6666"
+	docker run --rm --name Acme -d -p 6666:6666 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 /usr/local/lib/python3.5/dist-packages/indy_client/test/agent/acme.py  --port 6666"
 	@echo -e  $(OK_COLOR) Acme success assumes IPS $(IPS) $(NO_COLOR)
 
 thrift:
 	@echo -e  $(BLUE_COLOR) THRIFT: Create Thrift $(IPS) $(NO_COLOR)
-	docker run --rm --name Thrift -d -p 7777:7777 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 ./indy_client/test/agent/thrift.py  --port 7777"
+	docker run --rm --name Thrift -d -p 7777:7777 indy-base /bin/bash -c "create_dirs.sh; generate_indy_pool_transactions --nodes 4 --clients 5 --ips $(IPS); sleep 40; python3 /usr/local/lib/python3.5/dist-packages/indy_client/test/agent/thrift.py  --port 7777"
 	@echo -e  $(OK_COLOR) Thrift success assumes IPS $(IPS) $(NO_COLOR)
+
 
 stop:
 	-docker stop Node1
@@ -178,6 +176,7 @@ stop:
 	-docker stop Node3
 	-docker stop Node4
 	-docker stop Indy
+	-docker stop IndyAlice
 	-docker stop Faber
 	-docker stop Acme
 	-docker stop Thrift
@@ -188,6 +187,7 @@ start:
 	-docker start Node3
 	-docker start Node4
 	-docker start Indy
+	-docker start IndyAlice
 	-docker start Faber
 	-docker start Acme
 	-docker start Thrift
@@ -195,6 +195,7 @@ start:
 clean:
 	@echo -e  $(BLUE_COLOR) CLEAN out docker images and prune $(NO_COLOR)
 	-docker rm -f Indy
+	-docker rm -f IndyAlice
 	-docker rm -f Faber
 	-docker rm -f Acme
 	-docker rm -f Thrift
