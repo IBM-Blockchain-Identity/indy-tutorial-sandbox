@@ -1,3 +1,5 @@
+> This archive is deprecated and is no longer being maintained.
+
 # Abstract
 
 A turnkey, Docker-based sandbox that enables quick and easy exploration of Hyperledger Indy concepts. This devops repo can be used to gather hands-on experience of Indy basics using the scenarios outlined in the [Sovrin's Getting Started Guide](https://github.com/hyperledger/indy-node/blob/stable/getting-started.md).
